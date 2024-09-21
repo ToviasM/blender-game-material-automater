@@ -1,0 +1,32 @@
+{
+    "material_config": {
+      "material_types": {
+        "default": {
+          "suffix": "",
+          "required_texture_slots": [
+            {
+              "slot_name": "B",
+              "properties": {"ShaderNodeTexImage":{"image.colorspace_settings.name":"Non-Color"}},
+              "connections": [
+                [
+                    ["ShaderNodeTexImage.Color", "ShaderNodeMix.A"],
+                    ["ShaderNodeMix.Result", "{SHADER}.Base Color"]
+                ],
+                [
+                    ["ShaderNodeTexImage.Color", "ShaderNodeMix.B"],
+                    ["ShaderNodeMix.Result", "{SHADER}.Base Color"]
+                ]
+            ]
+            }
+          ],
+          "optional_texture_slots": []
+        }
+      }
+    },
+    "shader_config": {
+      "node_attributes": {
+        "color": "Base Color",
+        "alpha": "Alpha"
+      }
+    }
+  }      
