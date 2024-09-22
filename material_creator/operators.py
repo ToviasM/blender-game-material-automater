@@ -26,6 +26,73 @@ class CreateMaterial(bpy.types.Operator):
             return {'CANCELLED'}
         return {'FINISHED'}
 
+
+class AssignMaterialTexture(bpy.types.Operator):
+    bl_idname = "material_creator.create_material"
+    bl_label = "Assign Material Texture"
+
+    slot_name : bpy.props.StringProperty(
+        default='',
+        maxlen=35
+    )
+
+    texture_path : bpy.props.StringProperty(
+        default='',
+        maxlen=35
+    )
+
+
+    def execute(self, context):
+        properties = bpy.context.scene.material_creator
+        if properties and properties.source_material:
+            material.set_texture_map(properties, self.slot_name, self.texture_path)
+        else:
+            self.report({'ERROR'}, "No material found to assign texture to!")
+            return {'CANCELLED'}
+
+        return {'FINISHED'}
+
+
+class ChangeMaterialType(bpy.types.Operator):
+    bl_idname = "material_creator.create_material"
+    bl_label = "Create Material"
+
+    type_name : bpy.props.StringProperty(
+        default='',
+        maxlen=35
+    )
+
+    def execute(self, context):
+        properties = bpy.context.scene.material_creator
+        if properties and properties.source_material:
+            properties.material_type = properties.material_config.material_types[self.type_name]
+        else:
+            self.report({'ERROR'}, "Did not find material to change type of!")
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
+class CreateTextureSlot(bpy.types.Operator):
+    bl_idname = "material_creator.create_material"
+    bl_label = "Create Texture Slot"
+
+    slot_name : bpy.props.StringProperty(
+        default='',
+        maxlen=35
+    )
+
+    def execute(self, context):
+        properties = bpy.context.scene.material_creator
+        if properties and properties.source_material:
+            material.create_texture_slot(properties, self.slot_name)
+        else:
+            self.report({'ERROR'}, "No material found to create texture slot for!")
+            return {'CANCELLED'}
+
+        return {'FINISHED'}
+
+
+
 operator_classes = [
     CreateMaterial,
 ]

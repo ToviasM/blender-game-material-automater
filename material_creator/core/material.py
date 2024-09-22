@@ -232,8 +232,9 @@ def set_texture_map(properties, slot_name: str, path: str) -> None:
     """
     texture_node = get_texture_node(properties, slot_name)
     if texture_node is None:
-        LOGGER.error(f"No texture node found for slot '{slot_name}'")
-        return
+        LOGGER.info(f"No texture node found for slot '{slot_name}', creating a new one.")
+        create_texture_slot(properties, slot_name)
+        texture_node = get_texture_node(properties, slot_name)
     
     # Load the image from the specified path
     image = bpy.data.images.load(path)
