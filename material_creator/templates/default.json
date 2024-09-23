@@ -20,6 +20,21 @@
             }
           ],
           "optional_texture_slots": []
+        },
+        "metal": {
+          "suffix": "_Metal",
+          "required_texture_slots": [
+            {
+              "slot_name": "B",
+              "properties": {"ShaderNodeTexImage":{"image.colorspace_settings.name":"Non-Color"}},
+              "connections": [
+                [
+                    ["ShaderNodeTexImage.Color", "{SHADER}.Base Color"]
+                ]
+            ]
+            }
+          ],
+          "optional_texture_slots": []
         }
       }
     },

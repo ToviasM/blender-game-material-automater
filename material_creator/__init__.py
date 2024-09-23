@@ -3,7 +3,7 @@ import bpy
 import os
 import importlib
 
-from .core import material, template, utilities, validation
+from .core import material, template, utilities
 from .ui import addon_preferences
 from . import constants, operators, properties
 
@@ -19,7 +19,7 @@ bl_info = {
     "category": "Pipeline",
 }
 
-modules = [material, template, utilities, validation, constants, operators, properties, addon_preferences]
+modules = [constants, material, template, utilities, operators, properties, addon_preferences]
 
 
 def register():

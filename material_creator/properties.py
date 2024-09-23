@@ -3,17 +3,15 @@ import bpy
 from .core import material
 from . import constants
 
-
 class MaterialCreatorAddonProperties:
     template_path: bpy.props.StringProperty(
-        default='../templates/default.json'
+        default=constants.MaterialConstants.DEFAULT_TEMPLATE_PATH,
     )
 
 
 class MaterialProperties(bpy.types.PropertyGroup):
     source_material: bpy.props.PointerProperty(
-        type=bpy.types.Material,
-        update=material.change_material,
+        type=bpy.types.Material
     )
 
     node_tree: bpy.props.PointerProperty(
@@ -23,9 +21,7 @@ class MaterialProperties(bpy.types.PropertyGroup):
     material_type: bpy.props.StringProperty(
         default='',
         maxlen=35,
-        update=material.change_material_type,
     )
-
 
 def register():
     """

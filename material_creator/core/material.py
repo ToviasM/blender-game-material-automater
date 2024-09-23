@@ -4,13 +4,11 @@ import bpy
 import logging
 from typing import List, Optional, Any, Dict
 from .utilities import apply_shader_properties, find_node
-from ..constants import ToolInfo
+from ..constants import ToolInfo, MaterialConstants
 
 LOGGER = logging.getLogger(__name__)
 
-DEFAULT_TYPE = "default"
 
-#TODO - Introduce larger management system of settings
 def get_template():
     addon = bpy.context.preferences.addons.get(ToolInfo.NAME.value)
     template_path = addon.preferences.template_path
@@ -19,6 +17,33 @@ def get_template():
     
     return Template.from_json(template_path)
 
+def get_material_type(properties) -> str:
+    """
+    Determines the material type based on the material name suffix.
+    
+    Returns:
+        str: The material type name. If no match is found, returns the default type.
+    """
+    
+    for name, mat_type in get_template().material_config.material_types.items():
+        if name == MaterialConstants.DEFAULT_TYPE:
+            continue
+        if properties.source_material.name.endswith(mat_type.suffix):
+            return name
+    return MaterialConstants.DEFAULT_TYPE
+
+def get_new_material_name(properties, source_type, new_type) -> str:
+    """
+    Retrieves the material type suffix for the current material.
+    
+    Returns:
+        str: The material type suffix.
+    """
+    if source_type == MaterialConstants.DEFAULT_TYPE:
+        return properties.source_material.name + get_template().material_config.material_types[new_type].suffix
+
+    return properties.source_material.name.replace(get_template().material_config.material_types[source_type].suffix, get_template().material_config.material_types[new_type].suffix)
+
 def get_shader_node(properties) -> Optional[bpy.types.Node]:
     """
     Retrieves the shader node connected to the 'Surface' input of the material output node.
@@ -26,7 +51,7 @@ def get_shader_node(properties) -> Optional[bpy.types.Node]:
     Returns:
         Optional[bpy.types.Node]: The shader node if connected, None otherwise.
     """
-    material_output = properties.node_tree.nodes[0]
+    material_output = properties.node_tree.nodes["Material Output"]
     input_socket = material_output.inputs['Surface']
     
     if input_socket.is_linked:
@@ -35,6 +60,7 @@ def get_shader_node(properties) -> Optional[bpy.types.Node]:
         LOGGER.error("Could not find Shader Node")
         return None
 
+#TODO - Introduce larger system for management of nodes
 def create_texture_node(properties, slot: Any) -> None:
     """ 
     Creates a texture node for the specified slot and connects it to the shader node.
@@ -108,6 +134,40 @@ def get_texture_slots(properties, optional: bool = False) -> List[Optional['Text
         
     return required_slots
 
+def change_material_type(properties, new_type):
+    """Change the material type of the current material.
+    Args:
+        properties (MaterialProperties): The material properties.
+        new_type (str): The new material type to change to.
+    """
+    properties.material_type = new_type
+    type_name = properties.material_type
+    rename_material(properties, get_new_material_name(properties, get_material_type(properties), type_name))
+
+    create_material_nodes(properties)
+
+def change_material(properties, material) -> str:
+    """
+    Determines the material type based on the material name suffix.
+    
+    Returns:
+        str: The material type name. If no match is found, returns the default type.
+    """
+
+    properties.source_material = material
+    found_type = False
+
+    for name, mat_type in material.get_template().material_config.material_types.items():
+        if properties.source_material.name.endswith(mat_type.suffix):
+            properties.material_type = name
+            
+    if found_type == False:
+        properties.material_type = constants.MaterialConstants.DEFAULT_TYPE
+    
+    properties.node_tree = properties.source_material.node_tree
+
+    create_material_nodes(properties)
+
 def create_new_material(properties, material_name: str, type_name: str) -> None:
     """
     Creates A New Material 
@@ -115,7 +175,11 @@ def create_new_material(properties, material_name: str, type_name: str) -> None:
 
     material_type = get_template().material_config.material_types[type_name]
     material = bpy.data.materials.new(name=material_name + material_type.suffix)
+    material.use_nodes = True
+    
     properties.source_material = material
+    properties.node_tree = properties.source_material.node_tree
+
 
 def create_material_nodes(properties) -> None:
     """
@@ -136,39 +200,6 @@ def rename_material(properties, new_name: str) -> None:
         material.name = new_name
     else:
         LOGGER.error(f"Material '{properties.source_material.name}' not found, unable to rename.")
-
-def change_material_type(self, context):
-    properties = self
-
-    type_name = properties.material_type
-    new_type = get_template().material_config.material_types[type_name]
-    if not new_type:
-        new_type = DEFAULT_TYPE
-
-    rename_material(properties, properties.source_material.name.replace(properties.material_type, new_type.suffix))
-
-    create_material_nodes(properties)
-
-def change_material(self, context) -> str:
-    """
-    Determines the material type based on the material name suffix.
-    
-    Returns:
-        str: The material type name. If no match is found, returns the default type.
-    """
-
-    found_type = False
-    properties = self
-    
-    for name, mat_type in get_template().material_config.material_types.items():
-        if properties.source_material.name.endswith(mat_type.suffix):
-            properties.material_type = mat_type
-            
-    if found_type == False:
-        properties.material_type = DEFAULT_TYPE
-    
-    properties.node_tree = properties.source_material.node_tree
-    create_material_nodes(properties)
     
 
 def create_texture_slot(properties, slot_type: str) -> None:
