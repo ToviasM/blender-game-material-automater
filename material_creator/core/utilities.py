@@ -62,3 +62,19 @@ def get_operator_class_by_bl_idname(bl_idname):
     """
     context, name = bl_idname.split('.')
     return getattr(bpy.types, f'{context.upper()}_OT_{name}', None)
+
+def load_image(path):
+    for image in bpy.data.images:
+        if image.filepath == path:
+            return image
+    
+    image = bpy.data.images.load(path)
+    return image
+
+def get_material_index(material):
+    material_index = -1
+    for index, mat in enumerate(bpy.data.materials):
+        if mat == material:
+            material_index = index
+            break
+    return material_index

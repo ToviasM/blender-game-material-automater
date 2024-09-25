@@ -1,33 +1,7 @@
 import bpy
 
-class MATERIAL_PT_Panel(bpy.types.Panel):
-    bl_label = "Material Creator"
-    bl_idname = "MATERIAL_PT_panel"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_category = 'Material Creator'
-
-    def draw(self, context):
-        layout = self.layout
-        scene = context.scene
-
-        # Material List
-        row = layout.row()
-        row.template_list("MATERIAL_UL_items", "", scene, "materials", scene, "material_index")
-
-        # Display texture slots for the selected material
-        if scene.material_index >= 0 and scene.material_index < len(scene.materials):
-            material = scene.materials[scene.material_index]
-            box = layout.box()
-            box.label(text="Texture Slots")
-            for i, texture_slot in enumerate(material.texture_slots):
-                if texture_slot:
-                    box.prop(texture_slot, "name", text=f"Slot {i}")
-
-        # Create and Delete buttons
-        row = layout.row()
-        row.operator("material.create", text="Create Material")
-        row.operator("material.delete", text="Delete Material")
+from ..core import material
+from ..constants import ToolInfo
 
 class MATERIAL_UL_items(bpy.types.UIList):
     bl_idname = "MATERIAL_UL_items"
@@ -40,13 +14,80 @@ class MATERIAL_UL_items(bpy.types.UIList):
             layout.alignment = 'CENTER'
             layout.label(text="", icon='MATERIAL')
 
+class MATERIAL_PT_panel(bpy.types.Panel):
+    bl_label = "Material Panel"
+    bl_idname = "MATERIAL_PT_panel"
+    bl_space_type = ToolInfo.AREA.value
+    bl_region_type = ToolInfo.REGION.value
+    bl_category = ToolInfo.CATEGORY.value
+
+    def __init__(self, **kwargs):
+        super(MATERIAL_PT_panel).__init__(**kwargs)
+        self.texture_slots = {}
+
+    def draw(self, context):
+        layout = self.layout
+        properties = bpy.context.scene.material_creator
+        row = layout.row()
+        row.template_list("MATERIAL_UL_items", "", bpy.data, "materials", properties, "scene_material_index")
+
+       # Display properties for the selected material
+        if properties.source_material:
+
+            box = layout.box()
+            box.label(text="Material Properties - " + properties.material_type, icon='MATERIAL')
+            rename_operator = box.operator("material_creator.rename_material", text="Rename Material")
+            box.operator("material_creator.change_type", text="Change Type")
+            
+            material_type = material.get_template().material_config.material_types[material.get_material_type(properties)]
+            rename_operator.material_name = properties.source_material.name.replace(material_type.suffix, '')
+            
+            layout.separator()
+            layout.label(text="Texture Slots", icon='TEXTURE')
+            
+            # Display texture slots based on material type
+            for texture_slot in material.get_texture_slots(properties, optional=True):
+                texture_node = material.get_texture_node(properties, texture_slot.slot_name)
+                texture_slot_box = layout.box()
+                if not texture_node:
+                    label_row = texture_slot_box.row()
+                    label_row.label(text="Slot : " + texture_slot.slot_name + " " + texture_slot.description)
+                    row = texture_slot_box.row()
+                    op = row.operator("material_creator.assign_texture", text="Browse Image")
+                    op.slot_name = texture_slot.slot_name
+                else:
+                    if not isinstance(texture_node, ValueError):
+                        row = texture_slot_box.row()
+                        row.label(text="Slot : " + texture_slot.slot_name + " " + texture_slot.description)
+                        if texture_node.image:
+                            
+                            texture = bpy.data.textures.get(texture_slot.slot_name)
+                            if not texture:
+                                self.create_texture_preview_deferred(texture_slot.slot_name)
+                            elif texture_node.image != texture.image:
+                                self.create_texture_preview_deferred(texture_slot.slot_name)
+                            
+                            texture_slot_box.template_ID_preview(texture, "image", hide_buttons=True)
+                        op = texture_slot_box.operator("material_creator.assign_texture", text="Browse Image")
+                        op.slot_name = texture_slot.slot_name
+
+        layout.separator()
+        layout.label(text="Operations", icon='MODIFIER')
+        box_buttons = layout.box()
+        box_buttons.operator("material_creator.delete_material", text="Delete Selected Material")
+        box_buttons.operator("material_creator.create_material", text="Create Material")
+
+    def create_texture_preview_deferred(self, slot_name):
+        def _create_texture_preview():
+            bpy.ops.material_creator.create_texture_preview(slot_name=slot_name)
+            return None  # Returning None stops the timer
+
+        bpy.app.timers.register(_create_texture_preview)
+
 def register():
-    bpy.utils.register_class(MATERIAL_PT_Panel)
     bpy.utils.register_class(MATERIAL_UL_items)
+    bpy.utils.register_class(MATERIAL_PT_panel)
 
 def unregister():
-    bpy.utils.unregister_class(MATERIAL_PT_Panel)
     bpy.utils.unregister_class(MATERIAL_UL_items)
-
-if __name__ == "__main__":
-    register()
+    bpy.utils.unregister_class(MATERIAL_PT_panel)

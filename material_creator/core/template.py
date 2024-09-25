@@ -6,6 +6,7 @@ import typing as t
 @dataclass
 class TextureSlot():
     slot_name: str
+    description: str
     properties: t.Dict[str, t.Dict[str, str]]
     connections: t.List[t.List[str]]
     
@@ -13,6 +14,7 @@ class TextureSlot():
     def from_dict(cls: t.Type["TextureSlot"], obj: t.Dict):
         return cls(
             slot_name=obj["slot_name"],
+            description=obj["description"],
             properties=obj["properties"],
             connections=obj["connections"]
         )

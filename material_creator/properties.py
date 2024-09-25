@@ -10,8 +10,17 @@ class MaterialCreatorAddonProperties:
 
 
 class MaterialProperties(bpy.types.PropertyGroup):
+
+    def update_source_material(self, context):
+        material.change_material(self,bpy.data.materials[self.scene_material_index])
+    
     source_material: bpy.props.PointerProperty(
         type=bpy.types.Material
+    )
+
+    scene_material_index: bpy.props.IntProperty(
+        default=0,
+        update=update_source_material
     )
 
     node_tree: bpy.props.PointerProperty(
@@ -22,6 +31,7 @@ class MaterialProperties(bpy.types.PropertyGroup):
         default='',
         maxlen=35,
     )
+    
 
 def register():
     """

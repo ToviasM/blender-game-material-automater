@@ -3,7 +3,7 @@ from .template import Template, TextureSlot
 import bpy
 import logging
 from typing import List, Optional, Any, Dict
-from .utilities import apply_shader_properties, find_node
+from .utilities import apply_shader_properties, find_node, load_image, get_material_index
 from ..constants import ToolInfo, MaterialConstants
 
 LOGGER = logging.getLogger(__name__)
@@ -32,6 +32,13 @@ def get_material_type(properties) -> str:
             return name
     return MaterialConstants.DEFAULT_TYPE
 
+def get_material_types(cls, context) -> List[str]:
+
+    types = []
+    for name, mat_type in get_template().material_config.material_types.items():
+        types.append(name)
+    return [(item, item, "Material Type - " + item) for item in types]   
+
 def get_new_material_name(properties, source_type, new_type) -> str:
     """
     Retrieves the material type suffix for the current material.
@@ -51,13 +58,16 @@ def get_shader_node(properties) -> Optional[bpy.types.Node]:
     Returns:
         Optional[bpy.types.Node]: The shader node if connected, None otherwise.
     """
-    material_output = properties.node_tree.nodes["Material Output"]
-    input_socket = material_output.inputs['Surface']
-    
-    if input_socket.is_linked:
-        return input_socket.links[0].from_node
+    if properties.node_tree:
+        material_output = properties.node_tree.nodes["Material Output"]
+        input_socket = material_output.inputs['Surface']
+        
+        if input_socket.is_linked:
+            return input_socket.links[0].from_node
+        else:
+            LOGGER.error("Could not find Shader Node")
+            return None
     else:
-        LOGGER.error("Could not find Shader Node")
         return None
 
 #TODO - Introduce larger system for management of nodes
@@ -141,8 +151,7 @@ def change_material_type(properties, new_type):
         new_type (str): The new material type to change to.
     """
     properties.material_type = new_type
-    type_name = properties.material_type
-    rename_material(properties, get_new_material_name(properties, get_material_type(properties), type_name))
+    rename_material(properties, get_new_material_name(properties, get_material_type(properties), new_type))
 
     create_material_nodes(properties)
 
@@ -155,18 +164,15 @@ def change_material(properties, material) -> str:
     """
 
     properties.source_material = material
-    found_type = False
 
-    for name, mat_type in material.get_template().material_config.material_types.items():
+    material_type = None
+    for name, mat_type in get_template().material_config.material_types.items():
         if properties.source_material.name.endswith(mat_type.suffix):
-            properties.material_type = name
+            material_type = name
             
-    if found_type == False:
-        properties.material_type = constants.MaterialConstants.DEFAULT_TYPE
-    
+    properties.material_type = material_type or MaterialConstants.DEFAULT_TYPE
     properties.node_tree = properties.source_material.node_tree
-
-    create_material_nodes(properties)
+    
 
 def create_new_material(properties, material_name: str, type_name: str) -> None:
     """
@@ -177,7 +183,7 @@ def create_new_material(properties, material_name: str, type_name: str) -> None:
     material = bpy.data.materials.new(name=material_name + material_type.suffix)
     material.use_nodes = True
     
-    properties.source_material = material
+    properties.scene_material_index = get_material_index(material)
     properties.node_tree = properties.source_material.node_tree
 
 
@@ -210,7 +216,7 @@ def create_texture_slot(properties, slot_type: str) -> None:
         slot_type (str): The type of texture slot to create.
     """
     for slot in get_texture_slots(properties, optional=True):
-        if slot.name == slot_type:
+        if slot.slot_name == slot_type:
             create_texture_node(properties, slot)
 
 def get_texture_node(properties, slot_name: str) -> Optional[bpy.types.Node]:
@@ -235,7 +241,12 @@ def get_texture_node(properties, slot_name: str) -> Optional[bpy.types.Node]:
                     if "{SHADER}" not in attributes[1]:
                         continue
                     
-                    start_node = get_shader_node().inputs[input_attribute]
+                    shader_node = get_shader_node(properties)
+                    if not shader_node:
+                        LOGGER.error("Failed to create texture node: Shader node not found.")
+                        return ValueError("Shader node does not exist")
+                    
+                    start_node = shader_node.inputs[input_attribute]
 
                     # Check if the input is linked to a texture node
                     if start_node.is_linked:
@@ -246,11 +257,6 @@ def get_texture_node(properties, slot_name: str) -> Optional[bpy.types.Node]:
                                 f"Multiple textures connected to slot '{slot_name}'! Only one is allowed."
                             )
                         texture_node = node
-                    else:
-                        LOGGER.warning(
-                            f"Texture is not connected for slot '{slot_name}' at '{input_attribute}'."
-                        )
-
     return texture_node
 
 def set_texture_map(properties, slot_name: str, path: str) -> None:
@@ -268,8 +274,8 @@ def set_texture_map(properties, slot_name: str, path: str) -> None:
         texture_node = get_texture_node(properties, slot_name)
     
     # Load the image from the specified path
-    image = bpy.data.images.load(path)
-    
+    image = load_image(path)
+
     # Apply the image to the texture node
     apply_shader_properties(texture_node, {"image": image})
 
@@ -279,3 +285,27 @@ def set_texture_map(properties, slot_name: str, path: str) -> None:
             props = slot.properties.get(texture_node.bl_idname)
             if props:
                 apply_shader_properties(texture_node, props)
+    
+    create_texture_preview(properties, slot_name, texture_node)
+
+def create_texture_preview(properties, slot_name: str, texture_node=None) -> None:
+    """
+    Sets the texture map for the given slot name by loading an image from the specified path.
+    
+    Args:
+        slot_name (str): The name of the texture slot to apply the texture map to
+    """
+    if not texture_node:
+        texture_node = get_texture_node(properties, slot_name)
+        if texture_node is None:
+            LOGGER.info(f"No texture node found for slot '{slot_name}', creating a new one.")
+            create_texture_slot(properties, slot_name)
+            texture_node = get_texture_node(properties, slot_name)
+        
+    # Load the image from the specified path
+    texture = bpy.data.textures.get(slot_name)
+    if not texture:
+        texture = bpy.data.textures.new(slot_name, type="IMAGE")
+    texture.image = texture_node.image
+    texture.image.update()
+    texture.image.reload()

@@ -6,6 +6,7 @@
           "required_texture_slots": [
             {
               "slot_name": "B",
+              "description" : "(Base Color)",
               "properties": {"ShaderNodeTexImage":{"image.colorspace_settings.name":"Non-Color"}},
               "connections": [
                 [
@@ -26,6 +27,7 @@
           "required_texture_slots": [
             {
               "slot_name": "B",
+              "description": "(Base Color)",
               "properties": {"ShaderNodeTexImage":{"image.colorspace_settings.name":"Non-Color"}},
               "connections": [
                 [
@@ -34,7 +36,18 @@
             ]
             }
           ],
-          "optional_texture_slots": []
+          "optional_texture_slots": [
+            {
+              "slot_name": "MRO",
+              "description": "(Metallic, Roughness, Occlusion)",
+              "properties": {"ShaderNodeTexImage":{"image.colorspace_settings.name":"Non-Color"}},
+              "connections": [
+                [
+                    ["ShaderNodeTexImage.Alpha", "{SHADER}.Metallic"]
+                ]
+            ]
+            }
+          ]
         }
       }
     },
