@@ -351,3 +351,12 @@ def assign_to_selection(properties) -> None:
 
     if was_in_edit_mode:
         bpy.ops.object.mode_set(mode='EDIT')
+
+def delete_unused_materials() -> None:
+    """
+    Deletes all materials that are not assigned to any objects in the scene.
+    """
+    materials = bpy.data.materials
+    for material in materials:
+        if material.users == 0:
+            materials.remove(material)

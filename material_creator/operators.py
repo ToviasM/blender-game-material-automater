@@ -177,6 +177,14 @@ class AssignToSelection(bpy.types.Operator):
 
         return {'FINISHED'}
 
+class DeleteUnusedMaterials(bpy.types.Operator):
+    bl_idname = "material_creator.delete_unused_materials"
+    bl_label = "Delete Unused Materials"
+
+    def execute(self, context):
+        material.delete_unused_materials()
+        return {'FINISHED'}
+
 
 
 operator_classes = [
@@ -187,7 +195,8 @@ operator_classes = [
     CreateTexturePreview,
     DeleteMaterial,
     RenameMaterial,
-    AssignToSelection
+    AssignToSelection,
+    DeleteUnusedMaterials
 ]
 
 
