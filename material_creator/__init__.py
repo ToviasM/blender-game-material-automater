@@ -40,13 +40,7 @@ def unregister():
     properties.unregister()
     material_panel.unregister()
 
-#TODO - Collapsable Menus
-#TODO - Clean Code
-#TODO - More Operations
-#TODO - clean up JSON reads
-#TODO - Optimize UI updates
-#TODO - Create README & Proper Tool Info
-#TODO - Optimize constants and prefrences
-#TODO - The ability to extend
-#TODO - The ability to generate a json so downloading one is not required
+#TODO - More Operations / Organize them
+#TODO - Look into more JSON or addon preference settings
+#TODO - The ability to extend?
 #TODO - Unit tests

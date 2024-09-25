@@ -53,6 +53,7 @@ class MATERIAL_PT_panel(bpy.types.Panel):
         """ Draw the properties of the selected material """
         rename_operator = box.operator("material_creator.rename_material", text="Rename Material")
         box.operator("material_creator.change_type", text="Change Type")
+        box.operator("material_creator.delete_material", text="Delete", icon='ERROR')
 
         material_type = material.get_template().material_config.material_types[material.get_material_type(properties)]
         rename_operator.material_name = properties.source_material.name.replace(material_type.suffix, '')
@@ -93,8 +94,8 @@ class MATERIAL_PT_panel(bpy.types.Panel):
         """ Draw the operations for the selected material """
         layout = self.layout
         box_buttons = layout.box()
-        box_buttons.operator("material_creator.delete_material", text="Delete Selected Material")
         box_buttons.operator("material_creator.create_material", text="Create Material")
+        box_buttons.operator("material_creator.assign_to_selection", text="Assign To Selection")
 
     def create_texture_preview_deferred(self, slot_name):
         """ Create a texture preview for the given slot name """

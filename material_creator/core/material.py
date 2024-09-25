@@ -315,3 +315,39 @@ def create_texture_preview(properties, slot_name: str, texture_node=None) -> Non
     texture.image = texture_node.image
     texture.image.update()
     texture.image.reload()
+
+
+def assign_to_selection(properties) -> None:
+    """
+    Assigns the current material to the selected objects or faces in the scene.
+
+    Args:
+        properties (MaterialProperties): The material properties.
+    """
+
+    was_in_edit_mode = bpy.context.mode == 'EDIT_MESH'
+    if was_in_edit_mode:
+        bpy.ops.object.mode_set(mode='OBJECT')
+ 
+    selected_objects = bpy.context.selected_objects
+    selected_faces = [f for obj in selected_objects for f in obj.data.polygons if f.select]
+
+
+    for obj in selected_objects:
+        selected_faces = [f for f in obj.data.polygons if f.select]
+        if selected_faces:
+            if obj.type == "MESH":
+                if properties.source_material.name not in obj.data.materials:
+                    obj.data.materials.append(properties.source_material)
+                material_index = obj.data.materials.find(properties.source_material.name)
+                for face in selected_faces:
+                    face.material_index = material_index
+        else:
+
+            if obj.type == "MESH":
+                if properties.source_material.name not in obj.data.materials:
+                    obj.data.materials.append(properties.source_material)
+            obj.data.materials[properties.scene_material_index] = properties.source_material
+
+    if was_in_edit_mode:
+        bpy.ops.object.mode_set(mode='EDIT')

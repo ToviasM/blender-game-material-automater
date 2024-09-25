@@ -163,6 +163,21 @@ class RenameMaterial(bpy.types.Operator):
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
 
+class AssignToSelection(bpy.types.Operator):
+    bl_idname = "material_creator.assign_to_selection"
+    bl_label = "Assign Material to Selection"
+
+    def execute(self, context):
+        properties = bpy.context.scene.material_creator
+        if properties and properties.source_material:
+            material.assign_to_selection(properties)
+        else:
+            self.report({'ERROR'}, "No material found to assign to selection!")
+            return {'CANCELLED'}
+
+        return {'FINISHED'}
+
+
 
 operator_classes = [
     CreateMaterial,
@@ -171,7 +186,8 @@ operator_classes = [
     CreateTextureSlot,
     CreateTexturePreview,
     DeleteMaterial,
-    RenameMaterial
+    RenameMaterial,
+    AssignToSelection
 ]
 
 
