@@ -4,7 +4,7 @@ import os
 import importlib
 
 from .core import material, template, utilities
-from .ui import addon_preferences
+from .ui import addon_preferences, material_panel
 from . import constants, operators, properties
 
 bl_info = {
@@ -19,7 +19,7 @@ bl_info = {
     "category": "Pipeline",
 }
 
-modules = [constants, material, template, utilities, operators, properties, addon_preferences]
+modules = [constants, material, template, utilities, operators, properties, addon_preferences, material_panel]
 
 
 def register():
@@ -31,9 +31,23 @@ def register():
     properties.register()
     operators.register()
     addon_preferences.register()
+    material_panel.register()
 
 
 def unregister():
     operators.unregister()
     addon_preferences.unregister()
     properties.unregister()
+    material_panel.unregister()
+
+#TODO - Better node management and customization
+#TODO - Collapsable Menus
+#TODO - Clean Code
+#TODO - More Operations
+#TODO - clean up JSON reads
+#TODO - Optimize UI updates
+#TODO - Create README & Proper Tool Info
+#TODO - Optimize constants and prefrences
+#TODO - The ability to extend
+#TODO - The ability to generate a json so downloading one is not required
+#TODO - Unit tests
