@@ -47,7 +47,12 @@ class MATERIAL_PT_panel(bpy.types.Panel):
             
             # Display texture slots based on material type
             for texture_slot in material.get_texture_slots(properties, optional=True):
-                texture_node = material.get_texture_node(properties, texture_slot.slot_name)
+                texture_nodes = material.get_texture_nodes(properties, texture_slot.slot_name)
+
+                texture_node = None
+                if len(texture_nodes) > 0:
+                    texture_node = texture_nodes[0]
+                    
                 texture_slot_box = layout.box()
                 if not texture_node:
                     label_row = texture_slot_box.row()

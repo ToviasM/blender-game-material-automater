@@ -53,6 +53,38 @@ def find_node(current_node: bpy.types.Node, node_type: str) -> Optional[bpy.type
     
     return None
 
+def find_all_nodes(current_node: bpy.types.Node, node_type: str) -> Optional[bpy.types.Node]:
+    """
+    Recursively finds a node of the specified type, starting from the given node.
+    
+    Args:
+        current_node (bpy.types.Node): The node to start searching from.
+        node_type (str): The type of node to search for.
+    
+    Returns:
+        Optional[bpy.types.Node]: The found node if it matches the type, otherwise None.
+    """
+
+    nodes = []
+    # Check if the current node is of the desired type
+    if current_node.bl_idname == node_type:
+        return current_node
+
+    # Traverse through linked nodes via inputs
+    for socket in current_node.inputs:
+        if socket.is_linked:
+            for node_link in socket.links:
+                next_node = node_link.from_node
+                if next_node.bl_idname == node_type:
+                    nodes.append(next_node)
+                    continue
+                else:
+                    # Recursive search if the node isn't a direct match
+                    result_nodes = find_nodes(next_node, node_type)
+                    if result_nodes:
+                        nodes.append(result_nodes)
+    
+    return nodes
 
 def get_operator_class_by_bl_idname(bl_idname):
     """

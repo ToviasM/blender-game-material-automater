@@ -3,7 +3,7 @@ from .template import Template, TextureSlot
 import bpy
 import logging
 from typing import List, Optional, Any, Dict
-from .utilities import apply_shader_properties, find_node, load_image, get_material_index
+from .utilities import apply_shader_properties, find_node, load_image, get_material_index, find_all_nodes
 from ..constants import ToolInfo, MaterialConstants
 
 LOGGER = logging.getLogger(__name__)
@@ -219,7 +219,7 @@ def create_texture_slot(properties, slot_type: str) -> None:
         if slot.slot_name == slot_type:
             create_texture_node(properties, slot)
 
-def get_texture_node(properties, slot_name: str) -> Optional[bpy.types.Node]:
+def get_texture_nodes(properties, slot_name: str) -> Optional[bpy.types.Node]:
     """
     Retrieves the texture node for the given slot name.
     
@@ -229,7 +229,7 @@ def get_texture_node(properties, slot_name: str) -> Optional[bpy.types.Node]:
     Returns:
         Optional[bpy.types.Node]: The texture node if found, None otherwise.
     """
-    texture_node = None
+    texture_nodes = []
     
     for slot in get_texture_slots(properties, optional=True):
         if slot.slot_name == slot_name:
@@ -250,14 +250,9 @@ def get_texture_node(properties, slot_name: str) -> Optional[bpy.types.Node]:
 
                     # Check if the input is linked to a texture node
                     if start_node.is_linked:
-                        node = find_node(start_node.links[0].from_node, "ShaderNodeTexImage")
-                        
-                        if texture_node and texture_node != node:
-                            LOGGER.error(
-                                f"Multiple textures connected to slot '{slot_name}'! Only one is allowed."
-                            )
-                        texture_node = node
-    return texture_node
+                        nodes = find_all_nodes(start_node.links[0].from_node, "ShaderNodeTexImage")
+                        texture_nodes.extend(nodes)
+    return texture_nodes
 
 def set_texture_map(properties, slot_name: str, path: str) -> None:
     """
@@ -267,26 +262,28 @@ def set_texture_map(properties, slot_name: str, path: str) -> None:
         slot_name (str): The name of the texture slot to apply the texture map to.
         path (str): The file path of the image to load.
     """
-    texture_node = get_texture_node(properties, slot_name)
-    if texture_node is None:
+    texture_nodes = get_texture_nodes(properties, slot_name)
+    if len(texture_nodes) == 0:
         LOGGER.info(f"No texture node found for slot '{slot_name}', creating a new one.")
         create_texture_slot(properties, slot_name)
-        texture_node = get_texture_node(properties, slot_name)
-    
-    # Load the image from the specified path
-    image = load_image(path)
+        texture_nodes = get_texture_nodes(properties, slot_name)
+        
+    for texture_node in texture_nodes:
 
-    # Apply the image to the texture node
-    apply_shader_properties(texture_node, {"image": image})
+        # Load the image from the specified path
+        image = load_image(path)
 
-    # Apply additional shader properties if available
-    for slot in get_texture_slots(properties, optional=True):
-        if slot.slot_name == slot_name:
-            props = slot.properties.get(texture_node.bl_idname)
-            if props:
-                apply_shader_properties(texture_node, props)
-    
-    create_texture_preview(properties, slot_name, texture_node)
+        # Apply the image to the texture node
+        apply_shader_properties(texture_node, {"image": image})
+
+        # Apply additional shader properties if available
+        for slot in get_texture_slots(properties, optional=True):
+            if slot.slot_name == slot_name:
+                props = slot.properties.get(texture_node.bl_idname)
+                if props:
+                    apply_shader_properties(texture_node, props)
+        
+        create_texture_preview(properties, slot_name, texture_node)
 
 def create_texture_preview(properties, slot_name: str, texture_node=None) -> None:
     """
@@ -296,12 +293,14 @@ def create_texture_preview(properties, slot_name: str, texture_node=None) -> Non
         slot_name (str): The name of the texture slot to apply the texture map to
     """
     if not texture_node:
-        texture_node = get_texture_node(properties, slot_name)
+        texture_nodes = get_texture_nodes(properties, slot_name)
         if texture_node is None:
             LOGGER.info(f"No texture node found for slot '{slot_name}', creating a new one.")
             create_texture_slot(properties, slot_name)
-            texture_node = get_texture_node(properties, slot_name)
-        
+            texture_nodes = get_texture_nodes(properties, slot_name)
+            if len(texture_nodes) > 0:
+                texture_node = texture_nodes[0]
+    
     # Load the image from the specified path
     texture = bpy.data.textures.get(slot_name)
     if not texture:

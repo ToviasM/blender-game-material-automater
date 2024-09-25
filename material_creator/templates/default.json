@@ -10,13 +10,17 @@
               "properties": {"ShaderNodeTexImage":{"image.colorspace_settings.name":"Non-Color"}},
               "connections": [
                 [
-                    ["ShaderNodeTexImage.Color", "ShaderNodeMix.A"],
-                    ["ShaderNodeMix.Result", "{SHADER}.Base Color"]
+                    ["ShaderNodeTexImage.Color", "ShaderNodeSeparateColor.Color"],
+                    ["ShaderNodeSeparateColor.Red", "{SHADER}.Roughness"]
                 ],
                 [
-                    ["ShaderNodeTexImage.Color", "ShaderNodeMix.B"],
-                    ["ShaderNodeMix.Result", "{SHADER}.Base Color"]
-                ]
+                    ["ShaderNodeTexImage.Color", "ShaderNodeSeparateColor.Color"],
+                    ["ShaderNodeSeparateColor.Green", "{SHADER}.Metallic"]
+                ],
+                [
+                  ["ShaderNodeTexImage.Color", "ShaderNodeSeparateColor.Color"],
+                  ["ShaderNodeSeparateColor.Blue", "{SHADER}.Alpha"]
+              ]
             ]
             }
           ],
