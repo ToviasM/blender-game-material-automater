@@ -3,6 +3,7 @@ import bpy
 from .core import material
 from . import constants
 
+
 class MaterialCreatorAddonProperties:
     template_path: bpy.props.StringProperty(
         default=constants.MaterialConstants.DEFAULT_TEMPLATE_PATH,
@@ -12,7 +13,7 @@ class MaterialCreatorAddonProperties:
 class MaterialProperties(bpy.types.PropertyGroup):
 
     def update_source_material(self, context):
-        material.change_material(self,bpy.data.materials[self.scene_material_index])
+        material.change_material(self, bpy.data.materials[self.scene_material_index])
     
     source_material: bpy.props.PointerProperty(
         type=bpy.types.Material

@@ -12,8 +12,8 @@ bl_info = {
     "author": "Tovias Milliken",
     "version": (2, 4, 3),
     "blender": (4, 0, 0),
-    "location": "Header > Pipeline > Material Creator",
-    "description": "A tool to improve the material creation workflow for games",
+    "location": "3D View > N Panel > Material Creator",
+    "description": "A tool to improve the material creation workflow for games with a focused material pipeline.",
     "warning": "",
     "wiki_url": "",
     "category": "Pipeline",
@@ -40,7 +40,6 @@ def unregister():
     properties.unregister()
     material_panel.unregister()
 
-#TODO - Better node management and customization
 #TODO - Collapsable Menus
 #TODO - Clean Code
 #TODO - More Operations

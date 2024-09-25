@@ -1,13 +1,13 @@
 import bpy
 from .core import material, utilities
-from .ui.material_panel import MATERIAL_PT_panel
 from bpy_extras.io_utils import ExportHelper
+
 
 class CreateMaterial(bpy.types.Operator):
     bl_idname = "material_creator.create_material"
     bl_label = "Create Material"
- 
-    material_name : bpy.props.StringProperty(
+
+    material_name: bpy.props.StringProperty(
         name="Material Name",
         default='',
         maxlen=35
@@ -24,7 +24,7 @@ class CreateMaterial(bpy.types.Operator):
         properties = bpy.context.scene.material_creator
         if properties:
             material.create_new_material(properties, self.material_name, self.type_name)
-        
+
         if properties.source_material is None:
             self.report({'ERROR'}, "Was unable to create material!")
             return {'CANCELLED'}
@@ -32,13 +32,13 @@ class CreateMaterial(bpy.types.Operator):
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
-    
+
 
 class AssignMaterialTexture(bpy.types.Operator, ExportHelper):
     bl_idname = "material_creator.assign_texture"
     bl_label = "Assign Material Texture"
 
-    slot_name : bpy.props.StringProperty(
+    slot_name: bpy.props.StringProperty(
         default='',
         maxlen=35
     )
@@ -60,7 +60,7 @@ class CreateTexturePreview(bpy.types.Operator):
     bl_idname = "material_creator.create_texture_preview"
     bl_label = "Assign Material Texture"
 
-    slot_name : bpy.props.StringProperty(
+    slot_name: bpy.props.StringProperty(
         default='',
         maxlen=35
     )
@@ -101,14 +101,13 @@ class ChangeMaterialType(bpy.types.Operator):
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
-    
 
 
 class CreateTextureSlot(bpy.types.Operator):
     bl_idname = "material_creator.create_texture_slot"
     bl_label = "Create Texture Slot"
 
-    slot_name : bpy.props.StringProperty(
+    slot_name: bpy.props.StringProperty(
         default='',
         maxlen=35
     )
@@ -122,6 +121,7 @@ class CreateTextureSlot(bpy.types.Operator):
             return {'CANCELLED'}
 
         return {'FINISHED'}
+
 
 class DeleteMaterial(bpy.types.Operator):
     bl_idname = "material_creator.delete_material"
@@ -138,11 +138,12 @@ class DeleteMaterial(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class RenameMaterial(bpy.types.Operator):
     bl_idname = "material_creator.rename_material"
     bl_label = "Create Texture Slot"
 
-    material_name : bpy.props.StringProperty(
+    material_name: bpy.props.StringProperty(
         name="Material Name (Without Type)",
         default='',
         description="The new name for the material",
@@ -161,7 +162,6 @@ class RenameMaterial(bpy.types.Operator):
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
-
 
 
 operator_classes = [

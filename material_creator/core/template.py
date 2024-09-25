@@ -9,7 +9,7 @@ class TextureSlot():
     description: str
     properties: t.Dict[str, t.Dict[str, str]]
     connections: t.List[t.List[str]]
-    
+
     @classmethod
     def from_dict(cls: t.Type["TextureSlot"], obj: t.Dict):
         return cls(
@@ -39,7 +39,7 @@ class MaterialType():
 
     def dict(self):
         return {k: str(v) for k, v in asdict(self.items())}
- 
+
 
 @dataclass
 class MaterialConfig():
@@ -47,7 +47,7 @@ class MaterialConfig():
 
     @classmethod
     def from_dict(cls: t.Type["MaterialConfig"], obj: t.Dict):
-        
+
         return cls(
             material_types={key: MaterialType.from_dict(item) for key, item in obj["material_types"].items()}
         )
@@ -84,7 +84,7 @@ class Template():
             material_config=MaterialConfig.from_dict(obj["material_config"]),
             shader_config=ShaderConfig.from_dict(obj["shader_config"]),
         )
- 
+
     @classmethod
     def from_dict(cls: t.Type["Template"], obj: t.Dict):
         return cls(

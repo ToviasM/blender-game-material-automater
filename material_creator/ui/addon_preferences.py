@@ -20,6 +20,7 @@ class MaterialCreatorPreferences(MaterialCreatorAddonProperties, bpy.types.Addon
         row = self.layout.row()
         row.prop(self, 'template_path')
 
+
 def register():
     """
     Registers the addon preferences when the addon is enabled.
