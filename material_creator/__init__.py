@@ -5,6 +5,7 @@ import importlib
 
 from .core import material, template, utilities
 from .ui import addon_preferences, material_panel
+from .unittests import operator_tests
 from . import constants, operators, properties
 
 bl_info = {
@@ -19,7 +20,7 @@ bl_info = {
     "category": "Pipeline",
 }
 
-modules = [constants, material, template, utilities, operators, properties, addon_preferences, material_panel]
+modules = [constants, material, template, utilities, operators, properties, addon_preferences, material_panel, operator_tests]
 
 
 def register():
