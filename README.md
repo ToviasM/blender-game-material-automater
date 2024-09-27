@@ -2,40 +2,35 @@
 
 Welcome to the Blender Game Material Creator! This tool is designed to streamline the process of creating and managing materials for your game projects in Blender.
 
+<img src="./resources/creating_material.gif">
+
 ## Features
 
 - **Easy Material Creation**: Quickly create and customize materials with an intuitive interface.
 - **Texture Management**: Import, organize, and apply textures with ease.
-- **Shader Support**: Utilize a variety of shaders to achieve the desired look for your game assets.
+- **Shader Config**: Utilize the created configs, or create your own configs that match existing engines
 - COMING - **Batch Processing**: Apply changes to multiple materials at once to save time.
 - COMING - **Export Options**: Export materials in formats compatible with popular game engines.
+- COMING - **Performance Optimizations**: The UI for the tool can lag at times
 
 ## Installation
 
-1. Clone the repository:
-    ```sh
-    git clone https://github.com/ToviasM/blender-game-material-automater.git
-    ```
+1. Download the latest release from the releases page
 2. Open Blender and navigate to `Edit > Preferences > Add-ons`.
-3. Click `Install` and select the `blender-game-material-creator.zip` file.
+3. Click `Install` and select the `blender-material-creator.zip` file.
 4. Enable the add-on in the preferences window.
 
 ## Usage
 
-1. Open Blender and switch to the `Material Creator` tab.
-2. Click `New Material` to start creating a new material.
-3. Customize the material properties using the provided options.
+1. Open Blender and open the side panel in the 3D view with 'N', switch to the `Material Creator` tab.
+2. Click `Create Material` to start creating a new material.
+3. Customize the material type using the provided options.
 4. Apply textures by clicking `Browse` and selecting your desired image files.
 
-## Contributing
+## Known Issues
 
-We welcome contributions! Please follow these steps to contribute:
-
-1. Fork the repository.
-2. Create a new branch: `git checkout -b feature/YourFeature`.
-3. Commit your changes: `git commit -m 'Add some feature'`.
-4. Push to the branch: `git push origin feature/YourFeature`.
-5. Open a pull request.
+1. Often if the nodes are not formatted in a way that the tool understands it will cause the scene to lag.
+2. Currently it is limited to one shader node at a time as to be ingestible into engines, but this can be limiting. 
 
 ## License
 
