@@ -1,4 +1,5 @@
 import bpy
+import os
 from typing import Dict, Any, Optional
 
 
@@ -87,7 +88,6 @@ def find_all_nodes(current_node: bpy.types.Node, node_type: str) -> Optional[bpy
 
     return nodes
 
-
 def get_operator_class_by_bl_idname(bl_idname):
     """
     Gets a operator class from its bl_idname.
@@ -97,6 +97,18 @@ def get_operator_class_by_bl_idname(bl_idname):
     context, name = bl_idname.split('.')
     return getattr(bpy.types, f'{context.upper()}_OT_{name}', None)
 
+def delete_node_recursive (node_tree, node: bpy.types.Node) -> None:
+    """
+    Recursively deletes a node and all nodes linked to it.
+
+    Args:
+        node (bpy.types.Node): The node to delete.
+    """
+    for socket in node.inputs:
+        if socket.is_linked:
+            for link in socket.links:
+                delete_node_recursive(node_tree, link.from_node)
+    node_tree.nodes.remove(node)
 
 def load_image(path):
     """ Load an image from the given path """
@@ -116,3 +128,9 @@ def get_material_index(material):
             material_index = index
             break
     return material_index
+
+def join_relative_path(path):
+    """ Join the given path with the relative path of the current file """
+    if path.startswith(".."):
+        path = os.path.join(os.path.dirname(__file__), path)
+    return path

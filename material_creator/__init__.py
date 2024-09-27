@@ -40,8 +40,3 @@ def unregister():
     addon_preferences.unregister()
     properties.unregister()
     material_panel.unregister()
-
-#TODO - More Operations / Organize them
-#TODO - Look into more JSON or addon preference settings
-#TODO - The ability to extend?
-#TODO - Unit tests

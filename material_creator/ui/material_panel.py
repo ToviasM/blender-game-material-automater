@@ -58,6 +58,9 @@ class MATERIAL_PT_panel(bpy.types.Panel):
 
     def draw_texture_slots(self, layout, properties):
         """ Draw the texture slots for the selected material """
+
+        layout.separator()
+        layout.label(text="Texture Slots", icon='TEXTURE')
         for texture_slot in material.get_texture_slots(properties, optional=True):
             texture_nodes = material.get_texture_nodes(properties, texture_slot.slot_name)
             if isinstance(texture_nodes, ValueError):
@@ -66,9 +69,6 @@ class MATERIAL_PT_panel(bpy.types.Panel):
             texture_node = None
             if len(texture_nodes) > 0:
                 texture_node = texture_nodes[0]
-
-            layout.separator()
-            layout.label(text="Texture Slots", icon='TEXTURE')
 
             texture_slot_box = layout.box()
             if not texture_node:

@@ -20,45 +20,12 @@
                 [
                   ["ShaderNodeTexImage.Color", "ShaderNodeSeparateColor.Color"],
                   ["ShaderNodeSeparateColor.Blue", "{SHADER}.Alpha"]
+                ]
               ]
-            ]
             }
           ],
           "optional_texture_slots": []
-        },
-        "metal": {
-          "suffix": "_Metal",
-          "required_texture_slots": [
-            {
-              "slot_name": "B",
-              "description": "(Base Color)",
-              "properties": {"ShaderNodeTexImage":{"image.colorspace_settings.name":"Non-Color"}},
-              "connections": [
-                [
-                    ["ShaderNodeTexImage.Color", "{SHADER}.Base Color"]
-                ]
-            ]
-            }
-          ],
-          "optional_texture_slots": [
-            {
-              "slot_name": "MRO",
-              "description": "(Metallic, Roughness, Occlusion)",
-              "properties": {"ShaderNodeTexImage":{"image.colorspace_settings.name":"Non-Color"}},
-              "connections": [
-                [
-                    ["ShaderNodeTexImage.Alpha", "{SHADER}.Metallic"]
-                ]
-            ]
-            }
-          ]
         }
-      }
-    },
-    "shader_config": {
-      "node_attributes": {
-        "color": "Base Color",
-        "alpha": "Alpha"
       }
     }
   }      

@@ -1,0 +1,171 @@
+{
+    "material_config": {
+      "material_types": {
+        "default": {
+          "suffix": "",
+          "required_texture_slots": [
+            {
+              "slot_name": "B",
+              "description" : "(Base Color)",
+              "properties": {},
+              "connections": [
+                [
+                    ["ShaderNodeTexImage.Color", "{SHADER}.Base Color"]
+                ]
+              ]
+            }
+          ],
+          "optional_texture_slots": []
+        },
+      "PBR": {
+        "suffix": "_PBR",
+        "required_texture_slots": [
+          {
+            "slot_name": "B",
+            "description" : "(Base Color)",
+            "properties": {},
+            "connections": [
+              [
+                  ["ShaderNodeTexImage.Color", "{SHADER}.Base Color"]
+              ]
+            ]
+          },
+          {
+            "slot_name": "Mask",
+            "description" : "(Metallic, Occlusion, Detail Mask, Smoothness)",
+            "properties": {"ShaderNodeTexImage":{"image.colorspace_settings.name":"Non-Color"}},
+            "connections": [
+              [
+                  ["ShaderNodeTexImage.Color", "ShaderNodeSeparateColor.Color"],
+                  ["ShaderNodeSeparateColor.Red", "{SHADER}.Roughness"]
+              ],
+              [
+                  ["ShaderNodeTexImage.Color", "ShaderNodeSeparateColor.Color"],
+                  ["ShaderNodeSeparateColor.Green", "{SHADER}.Metallic"]
+              ],
+              [
+                ["ShaderNodeTexImage.Color", "ShaderNodeSeparateColor.Color"],
+                ["ShaderNodeSeparateColor.Blue", "{SHADER}.Alpha"]
+              ]
+            ]
+          }
+        ],
+        "optional_texture_slots": [
+          {
+            "slot_name": "N",
+            "description" : "(Normal)",
+            "properties": {"ShaderNodeTexImage":{"image.colorspace_settings.name":"Non-Color"}},
+            "connections": [
+              [
+                  ["ShaderNodeTexImage.Color", "ShaderNodeNormalMap.Color"],
+                  ["ShaderNodeNormalMap.Color", "{SHADER}.Normal"]
+              ]
+            ]
+          },
+          {
+            "slot_name": "E",
+            "description" : "(Emission)",
+            "properties": {},
+            "connections": [
+              [
+                  ["ShaderNodeTexImage.Color", "{SHADER}.Emission Color"]
+              ]
+            ]
+          }
+        ]
+      },
+      "Unlit": {
+        "suffix": "_Unlit",
+        "required_texture_slots": [
+          {
+            "slot_name": "B",
+            "description" : "(Base Color)",
+            "properties": {},
+            "connections": [
+              [
+                  ["ShaderNodeTexImage.Color", "{SHADER}.Base Color"]
+              ]
+            ]
+          }
+        ],
+        "optional_texture_slots": []
+      },
+      "UnlitBlend": {
+        "suffix": "_UnlitBlend",
+        "required_texture_slots": [
+          {
+            "slot_name": "B",
+            "description" : "(Base Color)",
+            "properties": {},
+            "connections": [
+              [
+                  ["ShaderNodeTexImage.Color", "{SHADER}.Base Color"]
+              ],
+              [
+                  ["ShaderNodeTexImage.Alpha", "{SHADER}.Alpha"]
+              ]
+            ]
+          }
+        ],
+        "optional_texture_slots": []
+      },
+      "UnlitCutout": {
+        "suffix": "_UnlitCutout",
+        "required_texture_slots": [
+          {
+            "slot_name": "B",
+            "description" : "(Base Color)",
+            "properties": {},
+            "connections": [
+              [
+                ["ShaderNodeTexImage.Color", "{SHADER}.Base Color"]
+              ],
+              [
+                  ["ShaderNodeTexImage.Alpha", "{SHADER}.Alpha"]
+              ]
+            ]
+          }
+        ],
+        "optional_texture_slots": []
+      },
+      "SimpleLit": {
+        "suffix": "_SimpleLit",
+        "required_texture_slots": [
+          {
+            "slot_name": "B",
+            "description" : "(Base Color)",
+            "properties": {},
+            "connections": [
+              [
+                  ["ShaderNodeTexImage.Color", "{SHADER}.Base Color"]
+              ]
+            ]
+          }
+        ],
+        "optional_texture_slots": [
+          {
+            "slot_name": "Mask",
+            "description" : "(Metallic, Occlusion, Detail Mask, Smoothness)",
+            "properties": {},
+            "connections": [
+              [
+                  ["ShaderNodeTexImage.Color", "{SHADER}.Base Color"]
+              ]
+            ]
+          },
+          {
+            "slot_name": "N",
+            "description" : "(Normal)",
+            "properties": {"ShaderNodeTexImage":{"image.colorspace_settings.name":"Non-Color"}},
+            "connections": [
+              [
+                  ["ShaderNodeTexImage.Color", "ShaderNodeNormalMap.Color"],
+                  ["ShaderNodeNormalMap.Color", "{SHADER}.Normal"]
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  }     
+} 

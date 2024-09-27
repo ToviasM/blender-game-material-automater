@@ -1,12 +1,35 @@
 import bpy
+import os
 
-from .core import material
+from .core import material, utilities
 from . import constants
 
 
 class MaterialCreatorAddonProperties:
-    template_path: bpy.props.StringProperty(
-        default=constants.MaterialConstants.DEFAULT_TEMPLATE_PATH,
+
+    def get_templates(self, context):
+        template_path = constants.MaterialConstants.DEFAULT_TEMPLATE_PATH
+        template_dir = os.path.dirname(utilities.join_relative_path(template_path))
+        
+        try:
+            template_files = os.listdir(template_dir)
+            templates = [(template, template, '') for template in template_files if template.endswith('.json')]
+        except FileNotFoundError:
+            templates = []
+
+        return templates
+
+    template_path: bpy.props.EnumProperty(
+        name="Template Path",
+        default=None,
+        items=get_templates,
+        description="Select the material type",
+    )
+
+    remove_existing_nodes: bpy.props.BoolProperty(
+        name="Remove Existing Nodes",
+        default=True,
+        description="Remove all existing nodes from the material when changing material types."
     )
 
 

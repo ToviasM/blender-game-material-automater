@@ -73,7 +73,6 @@ class ShaderConfig():
 @dataclass
 class Template():
     material_config: MaterialConfig
-    shader_config: ShaderConfig
 
     @classmethod
     def from_json(cls: t.Type["Template"], path: str):
@@ -81,15 +80,13 @@ class Template():
             obj = json.load(f)
 
         return cls(
-            material_config=MaterialConfig.from_dict(obj["material_config"]),
-            shader_config=ShaderConfig.from_dict(obj["shader_config"]),
+            material_config=MaterialConfig.from_dict(obj["material_config"])
         )
 
     @classmethod
     def from_dict(cls: t.Type["Template"], obj: t.Dict):
         return cls(
-            material_config=MaterialConfig.from_dict(obj["material_config"]),
-            shader_config=ShaderConfig.from_dict(obj["shader_config"]),
+            material_config=MaterialConfig.from_dict(obj["material_config"])
         )
 
     def dict(self):

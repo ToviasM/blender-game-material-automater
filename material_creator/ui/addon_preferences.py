@@ -19,6 +19,7 @@ class MaterialCreatorPreferences(MaterialCreatorAddonProperties, bpy.types.Addon
         """
         row = self.layout.row()
         row.prop(self, 'template_path')
+        row.prop(self, 'remove_existing_nodes')
 
 
 def register():

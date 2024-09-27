@@ -3,7 +3,7 @@ from .template import Template, TextureSlot
 import bpy
 import logging
 from typing import List, Optional, Any
-from .utilities import apply_shader_properties, find_node, load_image, get_material_index, find_all_nodes
+from .utilities import apply_shader_properties, find_node, load_image, get_material_index, find_all_nodes, join_relative_path, delete_node_recursive
 from ..constants import ToolInfo, MaterialConstants
 
 LOGGER = logging.getLogger(__name__)
@@ -12,10 +12,10 @@ LOGGER = logging.getLogger(__name__)
 def get_template():
     """ Get the template from the addon preferences """
     addon = bpy.context.preferences.addons.get(ToolInfo.NAME.value)
-    template_path = addon.preferences.template_path
-    if template_path.startswith(".."):
-        template_path = os.path.join(os.path.dirname(__file__), template_path)
+    template_name = addon.preferences.template_path
 
+    template_dir = os.path.dirname(join_relative_path(MaterialConstants.DEFAULT_TEMPLATE_PATH))
+    template_path = os.path.join(template_dir, template_name)
     return Template.from_json(template_path)
 
 
@@ -86,11 +86,15 @@ def create_texture_node(properties, slot: Any) -> None:
     Args:
         slot (Any): The texture slot for which a texture node will be created.
     """
+    new_inputs = []
+
     for connection in slot.connections:
         input_node = get_shader_node(properties)
         if not input_node:
             LOGGER.error("Failed to create texture node: Shader node not found.")
             return
+
+        new_inputs.append(connection[-1][1].split(".")[1])
 
         # Iterate over the connections in reverse order
         for attributes in connection[::-1]:
@@ -102,11 +106,11 @@ def create_texture_node(properties, slot: Any) -> None:
             input_attr = input_attr.replace("{SHADER}", input_node.bl_idname)
 
             # Get the shader input socket
-            shader_input_socket = input_node.inputs[input_attr.split(".")[1]]
-
-            # Check if the input is already linked to a node
-            if shader_input_socket.is_linked:
-                connected_node = find_node(shader_input_socket.links[0].from_node, output_attr.split(".")[0])
+            shader_input_socket = input_node.inputs.get(input_attr.split(".")[1])
+            if shader_input_socket:
+                # Check if the input is already linked to a node
+                if shader_input_socket.is_linked:
+                    connected_node = find_node(shader_input_socket.links[0].from_node, output_attr.split(".")[0])
 
             # Create a new node if no connected node was found
             if not connected_node:
@@ -130,6 +134,8 @@ def create_texture_node(properties, slot: Any) -> None:
 
             # Update input node to connected node for the next iteration
             input_node = connected_node
+ 
+    return new_inputs
 
 
 def get_texture_slots(properties, optional: bool = False) -> List[Optional['TextureSlot']]:
@@ -200,8 +206,16 @@ def create_material_nodes(properties) -> None:
     """
     Iterates over all texture slots and creates texture nodes for each slot.
     """
+    new_inputs = []
     for slot in get_texture_slots(properties):
-        create_texture_node(properties, slot)
+        new_inputs.extend(create_texture_node(properties, slot))
+    
+    input_node = get_shader_node(properties)
+    
+    # Remove the old links
+    deletable_inputs = [socket for socket in input_node.inputs if socket.is_linked and socket.name not in new_inputs]
+    for socket in deletable_inputs:
+        delete_node_recursive(properties.node_tree, socket.links[0].from_node)
 
 
 def rename_material(properties, new_name: str) -> None:
@@ -300,15 +314,14 @@ def create_texture_preview(properties, slot_name: str, texture_node=None) -> Non
         slot_name (str): The name of the texture slot to create a preview for.
         texture_node (bpy.types.Node): The texture node to create a preview for
     """
+    texture_nodes = get_texture_nodes(properties, slot_name)
     if not texture_node:
-        texture_nodes = get_texture_nodes(properties, slot_name)
-        if texture_node is None:
+        if texture_nodes is None:
             LOGGER.info(f"No texture node found for slot '{slot_name}', creating a new one.")
             create_texture_slot(properties, slot_name)
             texture_nodes = get_texture_nodes(properties, slot_name)
-            if len(texture_nodes) > 0:
-                texture_node = texture_nodes[0]
-
+    
+    texture_node = texture_node or texture_nodes[0]
     texture = bpy.data.textures.get(slot_name)
     if not texture:
         texture = bpy.data.textures.new(slot_name, type="IMAGE")
